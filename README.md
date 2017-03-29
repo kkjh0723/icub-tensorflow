@@ -1,7 +1,9 @@
 # icub-tensorflow
-Visuo-motor learning of iCub robot in the simulator using a deep learning model implemented in Tensorflow
+Visuo-motor learning of simulated iCub robot using a deep learning model implemented in Tensorflow
 
 # Requirements
+* Ubuntu
+* C++
 * Yarp and iCub
   * [iCub software installation from source](http://wiki.icub.org/wiki/Linux:Installation_from_sources)
   * NOTE: in order to manipulate cylinder objects in the simulator, cylinder-cylinder collision is required because the robot's finger is also a cylinder. You need to install ODE with `--enable-libccd` option. [intalling ODE](http://wiki.icub.org/wiki/Linux:_Installing_ODE) 
