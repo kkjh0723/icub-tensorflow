@@ -32,9 +32,15 @@ Visuo-motor learning of simulated iCub robot using a deep learning model impleme
 
 # Testing in the iCub simultor (iCub_SIM)
 1) Launch the simulator
-  * in on terminal: `yarpserver`
-  * another terminal: `iCub_SIM`
-2) 
+  * in one terminal: `yarpserver`
+  * in another terminal: `iCub_SIM`
+2) Build online testing program
+  * move to `onlineTestingProgram` folder and then move to`build` folder (make if there isn't)
+  * `cmake ../`
+  * `make`
+3) Run online testing program
+  * run `python main.py` in `onlineTestingProgram` folder (you might need to provide proper options e.g. `--log_dir ./../log_dir01_01')
+  * run `./worldManipulator`, `./fingerGrashper`, `./vision`, `./screenWriter` and then `./controller` (`./controller` should be the last one)
  
 
 # References
