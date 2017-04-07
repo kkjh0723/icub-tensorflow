@@ -1,8 +1,7 @@
 # icub-tensorflow
-Visuo-motor learning of simulated iCub robot using a deep learning model implemented in Tensorflow
+Visuo-motor learning of simulated iCub robot using a deep learning model implemented in Tensorflow (tested on simple toy task)
 
 # Requirements
-* Ubuntu
 * C++
 * Yarp and iCub
   * [iCub software installation from source](http://wiki.icub.org/wiki/Linux:Installation_from_sources)
@@ -23,3 +22,12 @@ Visuo-motor learning of simulated iCub robot using a deep learning model impleme
 * iCub 1.4.0
 * Python 2.7 (Anaconda)
 * Tensorflow 0.12.x
+
+# Task
+* We tested the program in a very simple object manipulation task. There is only one object (which can be different shapes and sizes) in front of the robot and the robot learned to grasp the object.
+
+# Training
+
+# Testing in simultor
+
+# References
