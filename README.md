@@ -3,7 +3,7 @@ Visuo-motor learning of simulated iCub robot using a deep learning model impleme
 
 # Requirements
 * C++
-* Yarp and iCub
+* Yarp and iCub (iCub_SIM)
   * [iCub software installation from source](http://wiki.icub.org/wiki/Linux:Installation_from_sources)
   * NOTE: in order to manipulate cylinder objects in the simulator, cylinder-cylinder collision is required because the robot's finger is also a cylinder. You need to install ODE with `--enable-libccd` option. [intalling ODE](http://wiki.icub.org/wiki/Linux:_Installing_ODE) 
   * Screen inside the simulator needs to be ON (It is set to show just checker board image in this sample experiment, but we are going to use it for gesture recognition task later). In order to turn on the screen, you need to change `screen` to `on` in `iCub_parts_activation.ini` inside `{iCub-folder}/contexts/simConfig` directory.
@@ -23,11 +23,18 @@ Visuo-motor learning of simulated iCub robot using a deep learning model impleme
 * Python 2.7 (Anaconda)
 * Tensorflow 0.12.x
 
-# Task
-* We tested the program in a very simple object manipulation task. There is only one object (which can be different shapes and sizes) in front of the robot and the robot learned to grasp the object.
+# Task & Model
+* We tested the program in a very simple object manipulation task. There is only one object (which can be different shapes and sizes) in front of the robot and the robot learned to grasp the object. 
+* [NOTE] Since the purpose of this code is to test connecting icub simulator and tensorflow, we ignore some necessary components for training and examining deep neural networks. First, we don't use any validation data although checking validation loss was implemented in the training code (we use same training data to validation). Second, we don't test generalization but only check whether the network do operate as it trained. The testing situation on the simulator is exactly same as the training data. We may conduct real research experiments based on this code in the future.      
+* We trained a CNN-RNN structure especially VMDNN [1] (or CNN-LSTM) model for the testing  
 
 # Training
 
-# Testing in simultor
+# Testing in the iCub simultor (iCub_SIM)
+1) Launch the simulator
+  * in on terminal: `yarpserver`
+  * another terminal: `iCub_SIM`
+2) 
+ 
 
 # References
