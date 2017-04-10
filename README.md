@@ -40,7 +40,8 @@ Visuo-motor learning of simulated iCub robot using a deep learning model impleme
   * `make`
 3) Run online testing program
   * run `python main.py` in `onlineTestingProgram` folder (you might need to provide proper options e.g. `--log_dir ./../log_dir01_01')
-  * run `./worldManipulator`, `./fingerGrashper`, `./vision`, `./screenWriter` and then `./controller` (`./controller` should be the last one)
+  * run `./worldManipulator`, `./fingerGrashper`, `./vision`, `./screenWriter` and then `./controller` in seperate terminals (`./controller` should be the last one)
+    * [NOTE] you can make a simple script to run all programs in one terminal (refer to `llauncher` and `killer` in `onlineTestingProgram` folder)  
  
 
 # References
