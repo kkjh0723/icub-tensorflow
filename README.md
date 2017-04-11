@@ -1,5 +1,5 @@
 # icub-tensorflow
-Visuo-motor learning of simulated iCub robot [[1]](http://dl.acm.org/citation.cfm?id=1774684) using a deep learning model implemented in Tensorflow (tested on simple toy task)
+Visuo-motor learning of simulated iCub robot [[1]](http://dl.acm.org/citation.cfm?id=1774684) using a deep learning model implemented in Tensorflow (tested on simple toy task). [Github page](https://github.com/kkjh0723/icub-tensorflow)
 
 # Requirements
 * C++
@@ -15,6 +15,7 @@ Visuo-motor learning of simulated iCub robot [[1]](http://dl.acm.org/citation.cf
 * Python 2.7
 * Tensorflow
   * [Tensorflow installation](https://www.tensorflow.org/install/)
+* tcmalloc (about memory performance using Tensorflow, refer to [Github issues #3009](https://github.com/tensorflow/tensorflow/issues/3009) and [Stackoverflow](http://stackoverflow.com/documentation/tensorflow/3883/how-to-debug-a-memory-leak-in-tensorflow#t=201704110952423938271))
 
 # Tested environment
 * Ubuntu 14.04
