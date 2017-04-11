@@ -28,7 +28,18 @@ Visuo-motor learning of simulated iCub robot using a deep learning model impleme
 * [NOTE] Since the purpose of this code is to test connecting icub simulator and tensorflow, we ignore some necessary components for training and examining deep neural networks. First, we don't use any validation data although checking validation loss was implemented in the training code (we use same training data to validation). Second, we don't test generalization but only check whether the network do operate as it trained. The testing situation on the simulator is exactly same as the training data. We may conduct real research experiments based on this code in the future.      
 * We trained a CNN-RNN structure especially VMDNN [1] (or CNN-LSTM) model for the testing  
 
+# Organization of the code
+* For training model
+* For online testing in the simulator 
+
 # Training
+1) Run `train_rnn.py`
+  * Some options
+    * `data_dir` and `data_fn`: for specify dataset location and file name
+    * `log_dir`: location for saving Tensorflow checkpoint file
+    * `device`: select CPU or GPU for training
+    * Some hyper parameters for the model (e.g. `lr`, `batch_size`,  and etc)
+    
 
 # Testing in the iCub simultor (iCub_SIM)
 1) Launch the simulator
@@ -39,8 +50,13 @@ Visuo-motor learning of simulated iCub robot using a deep learning model impleme
   * `cmake ../`
   * `make`
 3) Run online testing program
-  * run `python main.py` in `onlineTestingProgram` folder (you might need to provide proper options e.g. `--log_dir ./../log_dir01_01')
-  * run `./worldManipulator`, `./fingerGrashper`, `./vision`, `./screenWriter` and then `./controller` in seperate terminals (`./controller` should be the last one)
+  * Run `python main.py` in `onlineTestingProgram` folder (you might need to provide proper options e.g. `--log_dir ./../log_dir01_01')
+    * Some options
+       * `log dir`: a directory which contains check point file of trained model
+       * `max_leng`: maximum time steps you want to test
+       * `use_data_vision`,`use_data_motor`, and `use_data_vision` : for checking offline trained performance and debugging 
+       * `save_states` and `save_dir`: for saving internal states of the model while testing.
+  * Run `./worldManipulator`, `./fingerGrashper`, `./vision`, `./screenWriter` and then `./controller` in seperate terminals (`./controller` should be the last one)
     * [NOTE] you can make a simple script to run all programs in one terminal (refer to `llauncher` and `killer` in `onlineTestingProgram` folder)  
  
 
