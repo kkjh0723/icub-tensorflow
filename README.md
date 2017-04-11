@@ -24,7 +24,7 @@ Visuo-motor learning of simulated iCub robot using a deep learning model impleme
 * Tensorflow 0.12.x
 
 # Task & Model
-* We tested the program in a very simple object manipulation task. There is only one object (which can be different shapes and sizes) in front of the robot and the robot learned to grasp the object. 
+* We tested the program in a very simple object manipulation task. There is only one object (which can be different shapes and sizes) in front of the robot and the robot learned to grasp the object. The environment setting is similar to previous works [[1]](http://neurorobot.kaist.ac.kr/pdf_files/ICDL_2016_JS.pdf) and [[2]](https://arxiv.org/abs/1507.02347)
 * [NOTE] Since the purpose of this code is to test connecting icub simulator and tensorflow, we ignore some necessary components for training and examining deep neural networks. First, we don't use any validation data although checking validation loss was implemented in the training code (we use same training data to validation). Second, we don't test generalization but only check whether the network do operate as it trained. The testing situation on the simulator is exactly same as the training data. We may conduct real research experiments based on this code in the future.
 * Training datasets are collected using a dedicated program which is not shared in this repository. The structure of the dataset program is basically same as the online testing program in this repository but the motor generation part is replaced by hand coded program and saving vision(from iCub camera) and motor(from iCub joint) sequences parts are added. You can change either the data collecting program or the online testing program depending on your task senario.
 * We trained a CNN-RNN structure especially VMDNN [1] (or CNN-LSTM) model for the testing  
@@ -33,13 +33,13 @@ Visuo-motor learning of simulated iCub robot using a deep learning model impleme
 * For training model
   * `train_rnn.py`: main program for training deep neural network model using Tensorflow. Import model from `model.py` 
   * `model.py` : defining Tensorflow graph of the network model. you can define a new model you want to test.
-  * `BasicConvLSTMCell.py` : implementation of convolutional LSTM(or RNN) [[2]](https://arxiv.org/abs/1506.04214) by [loliverhennigh](https://github.com/loliverhennigh/Convolutional-LSTM-in-Tensorflow). We added `BasicConvCTRNNCell` where LSTM cells are replaced by continuous time RNN cells and `BasicConvCTNNCell` where LSTM cells are replaced by leaky integrators (as in MSTNN model [[3]](http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0131214))
+  * `BasicConvLSTMCell.py` : implementation of convolutional LSTM(or RNN) [[3]](https://arxiv.org/abs/1506.04214) by [loliverhennigh](https://github.com/loliverhennigh/Convolutional-LSTM-in-Tensorflow). We added `BasicConvCTRNNCell` where LSTM cells are replaced by continuous time RNN cells and `BasicConvCTNNCell` where LSTM cells are replaced by leaky integrators (as in MSTNN model [[4]](http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0131214))
   * `rnn_cell_ext.py`: implementation of normal CTRNN
   
 * For online testing in the simulator 
   * `controller`: main program which controls and synchronizes other sub-programs for the online testing. 
   * `worldManipulator`: a program which set the task environment according to the direction from `controller` (making and removing objects and tables)
-  * `fingerGrasper`: a program which controls the grasping level (a single scalar value from 0 to 10) as used in previous works [[1]](http://neurorobot.kaist.ac.kr/pdf_files/ICDL_2016_JS.pdf) and [[4]](https://arxiv.org/abs/1507.02347) 
+  * `fingerGrasper`: a program which controls the grasping level (a single scalar value from 0 to 10) as used in previous works [[1]](http://neurorobot.kaist.ac.kr/pdf_files/ICDL_2016_JS.pdf) and [[2]](https://arxiv.org/abs/1507.02347) 
   * `vision`: a program which capture visual scene from iCub camera for the network input and send it to the `main.py` according to the direction from `controller`
   * `screenWriter`: a program which project images to the screen inside the simulator
   * `main.py`: a Tensorflow program which loads trained checkpoint file, calculate model outputs and send it to the `controller` at each time step
