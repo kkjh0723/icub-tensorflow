@@ -33,7 +33,7 @@ Visuo-motor learning of simulated iCub robot [[1]](http://dl.acm.org/citation.cf
 * For training a model
   * `train_rnn.py`: main program for training a deep neural network model using Tensorflow. Import model from `model.py` 
   * `model.py` : defining Tensorflow graph of the network model. you can define a new model you want to test.
-  * `BasicConvLSTMCell.py` : implementation of convolutional LSTM(or RNN) [[4]](https://arxiv.org/abs/1506.04214) by [loliverhennigh](https://github.com/loliverhennigh/Convolutional-LSTM-in-Tensorflow). We added `BasicConvCTRNNCell` where LSTM cells are replaced by continuous time RNN (CTRNN) cells and `BasicConvCTNNCell` where LSTM cells are replaced by leaky integrator cells (as in MSTNN model [[5]](http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0131214))
+  * `BasicConvLSTMCell.py` : implementation of convolutional LSTM(or RNN) [[4]](https://arxiv.org/abs/1506.04214) by [loliverhennigh](https://github.com/loliverhennigh/Convolutional-LSTM-in-Tensorflow). We added `BasicConvCTRNNCell` where LSTM cells are replaced by continuous time RNN (CTRNN) cells and `BasicConvCTNNCell` where LSTM cells are replaced by leaky integrator cells (as in MSTNN model [[5]](http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0131214))
   * `rnn_cell_ext.py`: implementation of normal CTRNN
   
 * For online testing in the simulator 
