@@ -71,3 +71,11 @@ Visuo-motor learning of simulated iCub robot using a deep learning model impleme
   * Run `./worldManipulator`, `./fingerGrashper`, `./vision`, `./screenWriter` and then `./controller` in seperate terminals (`./controller` should be the last one)
     * [NOTE] you can make a simple script to run all programs in one terminal (refer to `llauncher` and `killer` in `onlineTestingProgram` folder)  
 
+# References
+[1] J. Hwang, M. Jung and J. Tani: “A Deep Learning Approach for Seamless Integration of Cognitive Skills for Humanoid Robots”, ICDL International Conference Developmental Learning and Epigenetic Robotics (ICDL-EPIROB), 2016
+
+[2] J. Hwang, M. Jung, M. Madapana, J. Kim, M. Choi, J. Tani: "Achieving “Synergy” in Cognitive Behavior of Humanoids via Deep Learning of Dynamic Visuo-Motor-Attentional Coordination", To appear in Proc. of 2015 IEEE-RAS International Conference on Humanoid Robots
+
+[3] Xingjian, S. H. I., et al. "Convolutional LSTM network: A machine learning approach for precipitation nowcasting." Advances in Neural Information Processing Systems. 2015.
+
+[4] Jung, Minju, Jungsik Hwang, and Jun Tani. "Self-organization of spatio-temporal hierarchy via learning of dynamic visual image patterns on action sequences." PloS one 10.7 (2015): e0131214.
