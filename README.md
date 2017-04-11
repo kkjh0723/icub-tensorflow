@@ -45,7 +45,7 @@ Visuo-motor learning of simulated iCub robot [[1]](http://dl.acm.org/citation.cf
   * `main.py`: a Tensorflow program which loads trained the checkpoint file, calculate model outputs and send it to the `controller` at each time step
   
 # Training
-1) Run `python train_rnn.py`
+1) Run `bash run_programs.sh` (or `python train_rnn.py` with proper options)
   * Some options
     * `data_dir` and `data_fn`: for specifying dataset location and file name
     * `log_dir`: a directory for saving Tensorflow checkpoint file
