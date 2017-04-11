@@ -30,6 +30,11 @@ Visuo-motor learning of simulated iCub robot using a deep learning model impleme
 
 # Organization of the code
 * For training model
+  * `train_rnn.py`: main program for training deep neural network model using Tensorflow. Import model from `model.py` 
+  * `model.py` : defining Tensorflow graph of the network model. you can define a new model you want to test.
+  * `BasicConvLSTMCell.py` : implementation of convolutional LSTM(or RNN) [[2]](https://arxiv.org/abs/1506.04214) by [loliverhennigh](https://github.com/loliverhennigh/Convolutional-LSTM-in-Tensorflow). I added `BasicConvCTRNNCell` where LSTM cells are replaced by continuous time RNN cells and `BasicConvCTNNCell` where LSTM cells are replaced by leaky integrators (as in MSTNN model [[3]](http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0131214))
+  * `rnn_cell_ext.py`: implementation of normal CTRNN
+  
 * For online testing in the simulator 
 
 # Training
@@ -61,3 +66,6 @@ Visuo-motor learning of simulated iCub robot using a deep learning model impleme
  
 
 # References
+[1] 
+[2] Xingjian, S. H. I., et al. "Convolutional LSTM network: A machine learning approach for precipitation nowcasting." Advances in Neural Information Processing Systems. 2015.
+[3] Jung, Minju, Jungsik Hwang, and Jun Tani. "Self-organization of spatio-temporal hierarchy via learning of dynamic visual image patterns on action sequences." PloS one 10.7 (2015): e0131214.
