@@ -41,7 +41,7 @@ Visuo-motor learning of simulated iCub robot using a deep learning model impleme
   * `worldManipulator`: a program which set the task environment according to the direction from `controller` (making and removing objects and tables)
   * `fingerGrasper`: a program which controls the grasping level (a single scalar value from 0 to 10) as used in previous works [[1]](http://neurorobot.kaist.ac.kr/pdf_files/ICDL_2016_JS.pdf) and [[2]](https://arxiv.org/abs/1507.02347) 
   * `vision`: a program which capture visual scene from iCub camera for the network input and send it to the `main.py` according to the direction from `controller`
-  * `screenWriter`: a program which project images to the screen inside the simulator
+  * `screenWriter`: a program which project images to the screen inside the simulator
   * `main.py`: a Tensorflow program which loads trained checkpoint file, calculate model outputs and send it to the `controller` at each time step
   
 # Training
