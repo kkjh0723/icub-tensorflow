@@ -28,7 +28,7 @@ Visuo-motor learning of simulated iCub robot [[1]](http://dl.acm.org/citation.cf
 * We tested the program in a very simple object manipulation task. There is only one object (which can be different location, shapes and sizes) in front of the robot and the robot is trained to grasp the object. The experiment settings are similar to previous works [[2]](http://neurorobot.kaist.ac.kr/pdf_files/ICDL_2016_JS.pdf) and [[3]](https://arxiv.org/abs/1507.02347)
 * [NOTE] Since the purpose of this code is to test connecting iCub simulator and tensorflow, we ignore some necessary components for training and examining deep neural networks. First, we don't use any validation data although checking validation loss was implemented in the training code (we use same training data to validation). Second, we don't test generalization but only check whether the network do operate as it trained. The testing situation on the simulator is exactly same as the training data. We may conduct real research experiments based on this code in the future.
 * Training datasets are collected using a dedicated program which is not shared in this repository. The structure of the dataset program is basically same as the online testing program in this repository but the motor generation part is replaced by hand coded program and saving vision(from iCub camera) and motor(from iCub joint) sequences parts are added. You can  either make the data collecting program or change the online testing program depending on your task senario.
-* We trained a CNN-RNN structure especially VMDNN [2] (or CNN-LSTM) model for the testing  
+* We trained a CNN-RNN structure especially CNN-LSTM model for testing (the model can be changed to VMDNN [[2]](http://neurorobot.kaist.ac.kr/pdf_files/ICDL_2016_JS.pdf) using `BasicConvCTNNCell` in `BasicConvLSTMCell.py` and `BasicCTRNNCell` in `rnn_cell_ext.py`)   
 
 # Organization of the code
 * For training a model
@@ -40,7 +40,7 @@ Visuo-motor learning of simulated iCub robot [[1]](http://dl.acm.org/citation.cf
 * For online testing in the simulator 
   * `controller`: main program which controls iCub robot and synchronizes other sub-programs for the online testing. 
   * `worldManipulator`: a program which set the task environment according to the direction from `controller` (making and removing objects and tables)
-  * `fingerGrasper`: a program which controls the grasping level (a single scalar value from 0 to 10) as used in previous works [[2]](http://neurorobot.kaist.ac.kr/pdf_files/ICDL_2016_JS.pdf) and [[3]](https://arxiv.org/abs/1507.02347) 
+  * `fingerGrasper`: a program which controls the grasping level (a single scalar value from 0 to 10) as used in previous works [[2]](http://neurorobot.kaist.ac.kr/pdf_files/ICDL_2016_JS.pdf) and [[3]](https://arxiv.org/abs/1507.02347) 
   * `vision`: a program which captures visual scene from iCub camera for the network input and sends it to the `main.py` according to the direction from `controller`
   * `screenWriter`: a program which projects images to the screen inside the simulator
   * `main.py`: a Tensorflow program which loads trained the checkpoint file, calculate model outputs and send it to the `controller` at each time step
