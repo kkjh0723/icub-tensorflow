@@ -1,0 +1,1 @@
+#define HUMAN_GESTURE_LENGTH 40

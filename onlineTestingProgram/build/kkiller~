@@ -1,0 +1,6 @@
+killall vision &
+killall worldManipulator &
+killall fingerGrasper &
+killall network &
+killall screenWriter &
+killall controller

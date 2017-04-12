@@ -1,0 +1,6 @@
+./vision &
+./network &
+./worldManipulator &
+./fingerGrasper &
+./screenWriter &
+./controller
