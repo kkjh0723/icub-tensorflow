@@ -1,6 +1,8 @@
 # icub-tensorflow
 Visuo-motor learning of simulated iCub robot [[1]](http://dl.acm.org/citation.cfm?id=1774684) using a deep learning model implemented in Tensorflow (tested on simple toy task). [Github page](https://github.com/kkjh0723/icub-tensorflow)
 
+Trained checkpoint file is too large to upload. You need to train using the `train_rnn.py` or we might upload the file in other places later. 
+
 # Requirements
 * C++
 * Yarp and iCub (iCub_SIM)
