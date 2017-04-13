@@ -8,19 +8,18 @@ import math
 
 #Import from custom
 import model
-#from data_loader import read_data_sets as rd
 
 # FLAGS (options)
-tf.flags.DEFINE_string("data_dir","./../NUMPY_DATASET/","")
+tf.flags.DEFINE_string("data_dir","./../NUMPY_DATASET/","directory which contains dataset")
 tf.flags.DEFINE_string("data_fn","vrpgp_db_161116_reduced.npz","data file name")
-tf.flags.DEFINE_string("log_dir","./log_dir", "directory for saving model and training log")
-tf.flags.DEFINE_string("checkpoint","rnnmodel_min.ckpt", "set check point file location")
-tf.flags.DEFINE_float("cl_ratio","0.0", "set ratio of transferring model's previous output to current input (0.0: open-loop <--> 1.0: closed-loop)")
+tf.flags.DEFINE_string("log_dir","./log_dir", "directory for loading trained model")
+tf.flags.DEFINE_string("checkpoint","rnnmodel_min.ckpt", "set check point file name")
+tf.flags.DEFINE_float("cl_ratio","0.0", "set ratio of transferring model's previous output to current input (0.0: open-loop <--> 1.0: closed-loop)") # not used
 tf.flags.DEFINE_string("device","/gpu:0", "device and device number to use (e.g. /gpu:0, /cpu:0)")
 tf.flags.DEFINE_integer("batch_size","8", "batch size")
 
 tf.flags.DEFINE_integer("mf_unit","64", "motor fast layer size")
-tf.flags.DEFINE_integer("ms_unit","32", "motor slowlayer size")
+tf.flags.DEFINE_integer("ms_unit","32", "motor slow layer size")
 tf.flags.DEFINE_integer("as_unit","32", "associative (PFC) layer size")
 tf.flags.DEFINE_integer("vs_unit","32", "vision slow layer size")
 tf.flags.DEFINE_integer("vm_unit","16", "vision middle layer size")
@@ -28,17 +27,16 @@ tf.flags.DEFINE_integer("vf_unit","8", "vision fast layer size")
 tf.flags.DEFINE_integer("vs_fsize","5", "vision slow layer filter size")
 tf.flags.DEFINE_integer("vm_fsize","5", "vision middle layer filter size")
 tf.flags.DEFINE_integer("vf_fsize","5", "vision fast layer filter size")
-tf.flags.DEFINE_integer("vo_fsize","7", "vision fast layer filter size")
+tf.flags.DEFINE_integer("vo_fsize","7", "vision output layer filter size")
 
-tf.flags.DEFINE_boolean("save_states", True, "save the activation and states of the model")
+tf.flags.DEFINE_boolean("save_states", True, "save activations and states of the model")
 tf.flags.DEFINE_string("save_filename","outputs_test", "filename for saving the activations and states of the model")
 
-tf.flags.DEFINE_boolean("train_data", True, "use traindata for testing")
-#tf.flags.DEFINE_boolean("read_attn", True, "enable attention for reader")
-#tf.flags.DEFINE_boolean("write_attn",True, "enable attention for writer")
+tf.flags.DEFINE_boolean("train_data", True, "use training data to generate output")
+
 flag = tf.flags.FLAGS
 
-#Check directory and FLAGs
+# check directory and FLAGs
 ckpt_path = os.path.join(flag.log_dir,flag.checkpoint)
 #isexist = os.path.exists(ckpt_path)
 #assert isexist
@@ -47,14 +45,14 @@ if flag.cl_ratio > 1.0 or flag.cl_ratio < 0.0:
     print ("cl_ratio is out of range [0.0 1.0]: %.2f" %flag.cl_ratio)
     assert False
 
-#DEVICE(CPU or GPU)
+# DEVICE(CPU or GPU)
 config = tf.ConfigProto(allow_soft_placement=True, log_device_placement=True)
 #config.gpu_options.allow_growth = True
 
-#Parameters
+# parameters
 eps=1e-8 # epsilon for numerical stability
 
-#Robot data
+# robot data
 print "Load datasets..."
 class DataSets(object):
     pass
@@ -72,7 +70,7 @@ else:
     dbs.idxd = data_raw['idxd_te']
     dbs.idxt = data_raw['idxt_te']
 
-num_type = np.max(dbs.idxt) + 1 # human provide while testing
+num_type = np.max(dbs.idxt) + 1 # human provide while testing (not used)
 num_data = dbs.idxd.shape[0]
 
 flag.out_size_vrow = dbs.vision.shape[-2]
@@ -81,7 +79,7 @@ flag.out_size_mdim = dbs.motor.shape[-2]
 flag.out_size_smdim = dbs.motor.shape[-1]
 
 
-#Softmax
+# load minmax file for motor transform
 sm_file = np.genfromtxt(flag.data_dir+'/dimMinMaxFile.txt', delimiter='\t')
 sm_file = sm_file.reshape([-1,2])
 sm_shape = sm_file.shape
@@ -90,7 +88,7 @@ sm_ref = np.zeros([sm_shape[0],flag.out_size_smdim])
 for i in xrange(flag.out_size_mdim):
     sm_ref[i] = np.linspace(sm_file[i,0], sm_file[i,1], num=flag.out_size_smdim)
 
-#network parameters
+# network parameters
 flag.vs_msize = (flag.out_size_vrow / 4, flag.out_size_vcol / 4)
 flag.vs_size = flag.vs_msize[0] * flag.vs_msize[1]
 
@@ -100,7 +98,7 @@ flag.vm_size = flag.vm_msize[0] * flag.vm_msize[1]
 flag.vf_msize = (flag.out_size_vrow, flag.out_size_vcol)
 flag.vf_size = flag.vf_msize[0] * flag.vf_msize[1]
 
-#initial state
+# initial state
 dbs.vf_h = np.zeros([num_data,flag.vf_msize[0],flag.vf_msize[1],flag.vf_unit])
 dbs.vf_c = np.zeros([num_data,flag.vf_msize[0],flag.vf_msize[1],flag.vf_unit])
 
@@ -119,7 +117,7 @@ dbs.ms_c = np.zeros([num_data,flag.ms_unit])
 dbs.as_h = np.zeros([num_data,flag.as_unit])
 dbs.as_c = np.zeros([num_data,flag.as_unit])
 
-#Check flag
+# check flag
 #assert num_data>=flag.batch_size
 save_fn = flag.log_dir + '/' + flag.save_filename + '.npz'
 isexist_save = os.path.exists(save_fn)
@@ -132,7 +130,7 @@ if __name__ == '__main__':
 
     with tf.device(flag.device):
 
-        #Input feed
+        # input feed
         motor = tf.placeholder(tf.float32, [None, None, flag.out_size_mdim, flag.out_size_smdim])
         vision = tf.placeholder(tf.float32, [None, None, flag.out_size_vrow, flag.out_size_vcol])
 
@@ -153,7 +151,7 @@ if __name__ == '__main__':
         ms_c = tf.placeholder(tf.float32, [None, flag.ms_unit])
         as_c = tf.placeholder(tf.float32, [None, flag.as_unit])
 
-        clratio = tf.placeholder(tf.float32, [1]) #closed loop ratio
+        clratio = tf.placeholder(tf.float32, [1]) #closed loop ratio (cannot be used in current architecture)
         lr = tf.placeholder(tf.float32, []) #learning rate
 
         vf_state = tf.nn.rnn_cell.LSTMStateTuple(vf_c, vf_h)
@@ -163,7 +161,7 @@ if __name__ == '__main__':
         ms_state = tf.nn.rnn_cell.LSTMStateTuple(ms_c, ms_h)
         as_state = tf.nn.rnn_cell.LSTMStateTuple(as_c, as_h)
 
-        # Model
+        # model
         rnn_model = model.Model(vision, motor, vf_state, vm_state, vs_state, mf_state, ms_state,
                                 as_state, vision_init, motor_init, clratio, lr, flag)
 
@@ -173,7 +171,7 @@ if __name__ == '__main__':
         saver.restore(sess, ckpt_path)
         print("Model restored.")
 
-        #training
+        # testing
         max_iter = int(math.ceil(num_data / flag.batch_size))
         if num_data % flag.batch_size != 0: max_iter = max_iter + 1
         num_save_batch = max_iter
@@ -190,7 +188,7 @@ if __name__ == '__main__':
                 max_batch_iter =cur_iter
                 cur_iter = 0
 
-
+            # container for keeping generated outputs and states
             pred_vs = np.array([])
             pred_ms = np.array([])
             c_vfs = np.array([])
@@ -312,13 +310,14 @@ if __name__ == '__main__':
             h_mss = np.array(h_mss)
             h_ass = np.array(h_ass)
 
-            print ("Inverse Softmax...")
+            print ("Inverse Transform...")
+            # take inverse transform to the motor output
             m_pred_inv = np.sum(np.multiply(pred_ms, sm_ref),axis=3)
             m_tar_inv = np.sum(np.multiply(dbs.motor[:,1:,:,:], sm_ref), axis=3)
 
             print ("Generation Finished.")
 
-
+            # save generated outputs and states
             if flag.save_states == True:
                 print "Saving the outputs and states"
                 save_file_str = '_%02d' %(save_iter)

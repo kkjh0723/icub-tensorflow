@@ -8,7 +8,6 @@ sys.path.insert(1, os.path.join(sys.path[0], '..')) # add parent directory to pa
 import model
 
 # FLAGS (options)
-# tf.flags.DEFINE_string("data_dir","./../data/dataset_np","")
 tf.flags.DEFINE_string("log_dir","./../log_dir01", "directory for saving model and training log")
 tf.flags.DEFINE_string("checkpoint","rnnmodel_min.ckpt", "set check point file location")
 tf.flags.DEFINE_float("cl_ratio","0.0", "set ratio of transferring model's previous output to current input (0.0: open-loop <--> 1.0: closed-loop)")
@@ -42,16 +41,16 @@ flag = tf.flags.FLAGS
 yp.Network.init()
 
 # Open ports
-port = yp.BufferedPortBottle()  # This port receives softmax target from the network.
+port = yp.BufferedPortBottle()  # This port send softmax output to the controller.
 port.open("/network/softmaxTarget:o")
 
-port_calcForward = yp.RpcServer()  # This port receives from the controller
+port_calcForward = yp.RpcServer()  # This port receives the command from the controller
 port_calcForward.open("/network/calcForward:rpcServer")
 
-port_img = yp.RpcServer()  # This port receives softmax target from the network.
+port_img = yp.RpcServer()  # This port receives visual input from the vision.
 port_img.open("/network/image:rpcServer")
 
-# defines in controller.h
+# defined in controller.h
 SOFTMAX_DIMENSION = 10
 NUM_SIG_DIM = 10
 TOTAL_SOFTMAX_DIM = SOFTMAX_DIMENSION*NUM_SIG_DIM
@@ -66,7 +65,7 @@ PREFIX = 'online'
 if flag.use_data_vision == True:
     PREFIX = 'data'
 
-#Check directory and FLAGs
+# check directories and FLAGs
 ckpt_path = os.path.join(flag.log_dir,flag.checkpoint)
 #isexist = os.path.exists(ckpt_path)
 #assert isexist
@@ -79,14 +78,14 @@ if flag.cl_ratio > 1.0 or flag.cl_ratio < 0.0:
     print ("cl_ratio is out of range [0.0 1.0]: %.2f" %flag.cl_ratio)
     assert False
 
-#DEVICE(CPU or GPU)
+# DEVICE(CPU or GPU)
 config = tf.ConfigProto(allow_soft_placement=True, log_device_placement=True)
 #config.gpu_options.allow_growth = True
 
-#Parameters
+# parameters
 eps=1e-8 # epsilon for numerical stability
 num_data = 1
-#Network parameters
+# network parameters
 flag.out_size_vrow = IMG_ROW
 flag.out_size_vcol = IMG_COL
 flag.out_size_mdim = NUM_SIG_DIM #!!
@@ -101,11 +100,9 @@ flag.vm_size = flag.vm_msize[0] * flag.vm_msize[1]
 flag.vf_msize = (flag.out_size_vrow, flag.out_size_vcol)
 flag.vf_size = flag.vf_msize[0] * flag.vf_msize[1]
 
-
-
 # network model
 with tf.device(flag.device):
-    # Input feed
+    # input feed
     motor = tf.placeholder(tf.float32, [None, None, flag.out_size_mdim, flag.out_size_smdim])
     vision = tf.placeholder(tf.float32, [None, None, flag.out_size_vrow, flag.out_size_vcol])
 
@@ -140,15 +137,15 @@ with tf.device(flag.device):
     rnn_model = model.Model(vision, motor, vf_state, vm_state, vs_state, mf_state, ms_state,
                             as_state, vision_init, motor_init, clratio, lr, flag)
 
-#start session and restore model
+# start session and restore model
 saver = tf.train.Saver()
 sess = tf.Session(config=config)
 saver.restore(sess, ckpt_path)
 print("Model restored.")
 
-#make container
+# make container
 batch_size = flag.batch_size
-batch_length = flag.max_leng + 1  # 1 step prediction
+batch_length = flag.max_leng + 1 # 1 step prediction
 
 sim_v = np.zeros([batch_size, batch_length, flag.out_size_vrow, flag.out_size_vcol])
 input_v = np.zeros([batch_size, batch_length, flag.out_size_vrow, flag.out_size_vcol])
@@ -168,7 +165,7 @@ h_mf = np.zeros([batch_size, batch_length, flag.mf_unit])
 h_ms = np.zeros([batch_size, batch_length, flag.ms_unit])
 h_as = np.zeros([batch_size, batch_length, flag.as_unit])
 
-#read initial motor softmax file
+# read transformed initial motor file
 fn_motor_sub = './softmaxConfig/target_home_softmax.txt'
 fn_motor = fn_motor_sub
 tmp_motor = np.genfromtxt(fn_motor,delimiter='\t')
@@ -177,7 +174,7 @@ motor_init_in = np.tile(motor_init_in,(batch_size))
 motor_init_in = motor_init_in.reshape([batch_size,flag.out_size_mdim, flag.out_size_smdim])
 pred_m[:,0,:,:] = motor_init_in
 
-#Softmax
+# motor transformation
 sm_file = np.genfromtxt('./softmaxConfig/dimMinMaxFile.txt', delimiter='\t')
 sm_shape = sm_file.shape
 assert flag.out_size_mdim == sm_shape[0]
@@ -186,6 +183,7 @@ for i in xrange(flag.out_size_mdim):
     sm_ref[i] = np.linspace(sm_file[i,0], sm_file[i,1], num=flag.out_size_smdim)
 
 while True:
+    # array to save network's softmax motor output
     netOut = np.zeros([SOFTMAX_DIMENSION], dtype=np.float32)
 
     # receive config info from controller
@@ -206,6 +204,7 @@ while True:
     responseConfig.addDouble(0)
     port_calcForward.reply(responseConfig)
 
+    # use collected data for generation
     if flag.use_data_vision or flag.show_vision:
         #image
         fn_image = './../data/vision/vision_%04d_%04d_%04d_%04d_%04d_%04d.txt' %(obj1st,0,0,0,0,0)
@@ -219,9 +218,10 @@ while True:
         motor_in = tmp_motor_in[:,:-1]
         motor_in = np.reshape(motor_in, [-1, flag.out_size_mdim, flag.out_size_smdim])
 
-    #start sequence
+    # start sequence
     step = 0
     while True:
+        # recieving image from vision
         recvImg = np.zeros([IMG_ROW * IMG_COL])
 
         cmd = yp.Bottle()
@@ -236,7 +236,7 @@ while True:
         response.addString("...received")
         port_img.reply(response)
 
-        # Check for calculation
+        # check for calculation
         cmdCalc = yp.Bottle()
         cmdCalc.clear()
         responseCalc = yp.Bottle()
@@ -414,15 +414,12 @@ while True:
             if flag.use_data_motor:
                 netOut[:TOTAL_SOFTMAX_DIM] = motor_in[step].reshape([flag.out_size_mdim * flag.out_size_smdim])
 
-            #pass to the controller
+            # pass to the controller
             output = port.prepare()
             output.clear()
-
             for idxSM in xrange(TOTAL_SOFTMAX_DIM):
                 output.addDouble(netOut[idxSM])
-
             port.write()
-
             responseCalc.addString("...Calc Done")
 
         else:
@@ -431,7 +428,7 @@ while True:
 
         yp.Time.delay(DELAY_NETWORK)
 
-        #End of forward dynamic
+        # end of forward dynamic
         port_calcForward.reply(responseCalc)
         step += STEP_INTERVAL
         print step

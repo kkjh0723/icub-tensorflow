@@ -19,23 +19,17 @@ def tanh_mod(x):
     return 1.7159 * tf.tanh(0.66666667 * x)
 
 class Model(object):
-    """
-    RNN model
-    inputs (later inputs_p, inputs_img)
-    states: state size of RNN cell
-
-    """
 
     def __init__(self, vision, motor, c_vf, c_vm, c_vs, c_mf, c_ms, c_as, v_init, m_init, cl_ratio, learning_rate, opt, rnn_cell = None, state_is_tuple=True):
 
-        #Hyperparameters
+        # hyperparameters
         self._out_size_vrow = opt.out_size_vrow
         self._out_size_vcol = opt.out_size_vcol
         self._out_size_vision = self._out_size_vrow*self._out_size_vcol
         self._out_size_smdim = opt.out_size_smdim  # softmax dim. of motor
         self._out_size_mdim = opt.out_size_mdim  # motor dimension
         self._out_size_motor = self._out_size_smdim * self._out_size_mdim
-        self._eps = 1e-8
+        self._eps = 1e-8 #epsilon
         self._state_is_tuple = state_is_tuple  # state should be always tuple
 
         self._mo_unit = self._out_size_motor
@@ -48,7 +42,7 @@ class Model(object):
         self._vs_size = opt.vs_size
         self._vs_fsize = (opt.vs_fsize, opt.vs_fsize)  # filter size
 
-        self._vm_unit = opt.vm_unit # vision fast
+        self._vm_unit = opt.vm_unit # vision middle
         self._vm_msize = opt.vm_msize
         self._vm_size = opt.vm_size
         self._vm_fsize = (opt.vm_fsize, opt.vm_fsize) #filter size
@@ -60,13 +54,13 @@ class Model(object):
 
         self._vo_fsize = (opt.vo_fsize, opt.vo_fsize)  # filter size
 
-        #Input Nodes
-        self._v_in = vision[:,:-1,:,:]#vision input [batch,time,vrow,vcol]
-        self._v_out = vision[:, 1:, :, :]  # vision output
-        self._v_init = v_init  # initial vision input for closed loop generation
+        # input/ouput Nodes
+        self._v_in = vision[:,:-1,:,:]  # vision input [batch,time,vrow,vcol]
+        self._v_out = vision[:, 1:, :, :]  # vision output target
+        self._v_init = v_init  # initial vision input for closed loop generation (not used)
 
-        self._m_in = motor[:,:-1,:,:] #motor input [batch, time, dim]
-        self._m_out = motor[:, 1:, :, :] #motor output
+        self._m_in = motor[:,:-1,:,:] # motor input [batch, time, dim, smdim]
+        self._m_out = motor[:, 1:, :, :] # motor output target
         self._m_init = m_init  # initial motor input for closed loop generation
 
         self._c_as = c_as
@@ -76,54 +70,30 @@ class Model(object):
         self._c_ms = c_ms
         self._c_mf = c_mf
 
-        self._cl = cl_ratio #closed loop ratio
-        self._lr = learning_rate #learning rate
+        self._cl = cl_ratio # closed loop ratio
+        self._lr = learning_rate # learning rate
 
 
-        #Variables
-
+        # Variables
         # vision fast
         with tf.variable_scope('vf'):
             self.cell_vf = bc.BasicConvCTNNCell(self._vf_size, self._vf_fsize, self._vf_unit, 1.0,
                                                 state_is_tuple=self._state_is_tuple)
-            '''
-            # vs to vm
-            self.W_vf_td = tf.get_variable('W_vf_td',
-                                           shape=[self._vm_fsize[0], self._vm_fsize[1], self._vm_unit, self._vf_unit],
-                                           initializer=tf.constant_initializer(0.0))
-            self.b_vf_td = tf.get_variable('b_vf_td', shape=[self._vf_unit],
-                                           initializer=tf.constant_initializer(0.0))
-            '''
+            # self.cell_vf = bc.BasicConvCTNNCell(self._vf_size, self._vf_fsize, self._vf_unit, 1.0,
+            #                                 state_is_tuple=self._state_is_tuple)
 
         # vision mid
         with tf.variable_scope('vm'):
             self.cell_vm = bc.BasicConvCTNNCell(self._vm_size, self._vm_fsize, self._vm_unit,1.0,
                                                 state_is_tuple=self._state_is_tuple)
-            '''
-            # vs to vm
-            self.W_vm_td = tf.get_variable('W_vm_td',
-                                           shape=[self._vs_fsize[0], self._vs_fsize[1], self._vs_unit, self._vm_unit],
-                                           initializer=tf.constant_initializer(0.0))
-            self.b_vm_td = tf.get_variable('b_vm_td', shape=[self._vm_unit],
-                                           initializer=tf.constant_initializer(0.0))
-            '''
+            # self.cell_vm = bc.BasicConvCTNNCell(self._vm_size, self._vm_fsize, self._vm_unit, 4.0,
+            #                                 state_is_tuple=self._state_is_tuple)
 
         #vision slow
         with tf.variable_scope('vs'):
             self.cell_vs = bc.BasicConvCTNNCell(self._vs_size, self._vs_fsize, self._vs_unit, 1.0, state_is_tuple=self._state_is_tuple)
-
-            # as to vs
-            #self.W_vs_td = tf.get_variable('W_vs_td', shape=[1, 1, self._as_unit, self._vs_unit],
-            #                               initializer=tf.constant_initializer(0.0))
-            #self.b_vs_td = tf.get_variable('b_vs_td', shape=[self._vs_unit],
-            #                               initializer=tf.constant_initializer(0.0))
-
-            '''
-            self.W_vs_td = tf.get_variable('W_vs_td', shape=[self._as_unit, self._vs_size/4 * self._vs_unit],
-                                           initializer=tf.constant_initializer(0.0))
-            self.b_vs_td = tf.get_variable('b_vs_td', shape=[self._vs_size/4 * self._vs_unit],
-                                           initializer=tf.constant_initializer(0.0))
-            '''
+            # self.cell_vs = bc.BasicConvCTNNCell(self._vs_size, self._vs_fsize, self._vs_unit, 16.0,
+            #                                 state_is_tuple=self._state_is_tuple)
 
         # associative
         with tf.variable_scope('as'):
@@ -149,18 +119,13 @@ class Model(object):
         self.b_v_out = tf.get_variable('b_v_out', shape=[1],
                                      initializer=tf.constant_initializer(0.0))
 
-        #self.W_v_out = tf.get_variable('W_v_out', shape=[self._vf_size*self._vf_unit, self._out_size_vision])
-        #self.b_v_out = tf.get_variable('b_v_out', shape=[self._out_size_vision],
-        #                               initializer=tf.constant_initializer(0.0))
-
-
         #graphs
         self.prediction
         self.optimize
 
 
     def model_step(self, input, model_out_prev):
-        input_vision, input_motor = input#(vision, motor)
+        input_vision, input_motor = input #(vision, motor)
         prev_vision, prev_motor, prev_cell_vf, prev_cell_vm, prev_cell_vs, prev_cell_mf, prev_cell_ms , prev_cell_as = model_out_prev
 
         input_vision = tf.reshape(input_vision, [-1, self._out_size_vrow, self._out_size_vcol, 1])
@@ -175,46 +140,23 @@ class Model(object):
         prev_out_vs, prev_state_vs = prev_cell_vs
 
         # switching btw. open-loop and closed-loop
-        # cur_vision = tf.mul(input_vision, 1 - self._cl)
         cur_vision = tf.mul(prev_vision, self._cl) + tf.mul(input_vision, 1 - self._cl)
         #cur_motor = tf.mul(prev_motor, self._cl) + tf.mul(input_motor, 1 - self._cl)
 
         # vision fast (from vm and vision input)
-        '''
-        prev_out_vm_t = tf.tanh(
-            tf.nn.conv2d(prev_out_vm, self.W_vf_td, strides=[1, 1, 1, 1], padding='SAME') + self.b_vf_td)
-        prev_out_vm_t = tf.image.resize_bilinear(prev_out_vm_t, [self._vf_msize[0], self._vf_msize[1]])  # upsampled
-        '''
         input_vf = cur_vision
-        #input_vf = tf.concat(3, [prev_out_vm_t, cur_vision])
         cell_vf = self.cell_vf(input_vf, prev_cell_vf, scope='vf')
         cell_out_vf, cell_state_vf = cell_vf
-        # cell_out_vf = tf.reshape(cell_out_vf,[-1,self._vf_size*self._vf_unit])
 
         # vision mid(from vs and vf)
-        '''
-        prev_out_vs_t = tf.tanh(
-            tf.nn.conv2d(prev_out_vs, self.W_vm_td, strides=[1, 1, 1, 1], padding='SAME') + self.b_vm_td)
-        prev_out_vs_t = tf.image.resize_bilinear(prev_out_vs_t, [self._vm_msize[0], self._vm_msize[1]])  # upsampled
-        '''
         prev_out_vf_p = tf.nn.avg_pool(cell_out_vf, [1, 2, 2, 1], [1, 2, 2, 1], padding='SAME')  # pooled
-        #input_vm = tf.concat(3, [prev_out_vs_t, prev_out_vf_p])
         input_vm = prev_out_vf_p
         cell_vm = self.cell_vm(input_vm, prev_cell_vm, scope='vm')
         cell_out_vm, cell_state_vm = cell_vm
 
         # vision slow (from as and vm)
-        #prev_out_as_t = tf.tanh(
-        #    tf.nn.conv2d(tf.reshape(prev_out_as,[-1,1,1,self._as_unit]), self.W_vs_td, strides=[1, 1, 1, 1], padding='SAME') + self.b_vs_td)
-        '''
-        prev_out_as_t = tf.reshape(tf.matmul(prev_out_as, self.W_vs_td) + self.b_vs_td,
-                                   shape=[-1, self._vs_msize[0]/2, self._vs_msize[1]/2, self._vs_unit])
-        prev_out_as_t = tf.tanh(prev_out_as_t)
-        prev_out_as_t = tf.image.resize_bilinear(prev_out_as_t, [self._vs_msize[0], self._vs_msize[1]])  # upsampled
-        '''
         prev_out_vm_p = tf.nn.avg_pool(cell_out_vm, [1, 2, 2, 1], [1, 2, 2, 1], padding='SAME')  # pooled
         input_vs = prev_out_vm_p
-        #input_vs = tf.concat(3, [prev_out_as_t, prev_out_vm_p])
         cell_vs = self.cell_vs(input_vs, prev_cell_vs, scope='vs')
         cell_out_vs, cell_state_vs = cell_vs
 
@@ -232,8 +174,6 @@ class Model(object):
         cell_out_ms, cell_state_ms = cell_ms
 
         # motor fast (from motor input and ms)
-        #input_mf = tf.concat(1, [tf.reshape(0.0 * cur_motor, [-1, self._out_size_motor]),
-        #                         tf.reshape(cell_out_ms, [-1, self._ms_unit])])
         input_mf = tf.reshape(cell_out_ms, [-1, self._ms_unit])
         cell_mf = self.cell_mf(input_mf, prev_cell_mf, scope='mf')
         cell_out_mf, cell_state_mf = cell_mf
@@ -243,7 +183,7 @@ class Model(object):
         logit_motor_rs = tf.reshape(logit_motor,[-1,self._out_size_mdim, self._out_size_smdim])#reshape for softmax
         pred_step_motor = tf.nn.softmax(logit_motor_rs)  # softmax connot be at the outside b.o. closed loop (it might be faster...)
 
-        # Vision output
+        # vision output (not used)
         logit_vision = tanh_mod(tf.nn.conv2d(cell_out_vf, self.W_v_out, strides = [1,1,1,1], padding = 'SAME') + self.b_v_out)
         #logit_vision = tanh_mod(tf.add(tf.matmul(cell_out_vf,self.W_v_out),self.b_v_out))
         pred_step_vision = tf.reshape(logit_vision,[-1,self._out_size_vrow,self._out_size_vcol])
@@ -254,7 +194,7 @@ class Model(object):
 
     @lazy_property
     def prediction(self):
-        # Recurrent network. (same length in a batch)
+        # recurrent network. (same length in a batch)
 
         # transpose inputs for scan and make tuple
         v_t = tf.transpose(self._v_in, perm=[1, 0, 2, 3])
@@ -269,9 +209,6 @@ class Model(object):
 
         pred_v_t, pred_m_t, c_vf_t, c_vm_t, c_vs_t, c_mf_t, c_ms_t, c_as_t = scan_outputs
 
-        #pred_shape = tf.shape(prediction_t)
-        #prediction_t = tf.nn.softmax(tf.reshape(prediction_t,shape=[-1,pred_shape[2]]))
-        #prediction_t = tf.reshape(prediction_t,shape = [pred_shape[0],pred_shape[1],pred_shape[2]])
         pred_v = tf.transpose(pred_v_t, perm=[1, 0, 2, 3], name='pred_v')
         pred_m = tf.transpose(pred_m_t, perm=[1, 0, 2, 3], name='pred_m')
 
@@ -293,7 +230,6 @@ class Model(object):
         loss_motor = tf.reduce_mean(-tf.reduce_sum(tar_m_crop * (tf.log(pre_m_crop + self._eps) - tf.log(tar_m_crop + self._eps)), reduction_indices=[2,3]), name = 'loss_motor')
 
         loss = loss_motor
-        #loss = tf.reduce_mean((self.target_p - pred) ** 2, name='loss') + 0.0001*tf.nn.l2_loss(self._init_state) + 0.0001*tf.nn.l2_loss(self._init_state_s)
         return loss, loss_vision, loss_motor
 
     @lazy_property
@@ -304,10 +240,3 @@ class Model(object):
         return optimizer.minimize(loss_sum, aggregation_method=tf.AggregationMethod.EXPERIMENTAL_TREE) #, aggregation_method=2
 
 
-
-
-"""
-        #scan_outputs = tf.scan(lambda a, x: self.cell(x, a[1, :, :]), tf.transpose(self.input_p, perm=[1, 0, 2]),
-        #                       initializer=(self.cell.zero_state(tf.shape(self.input_p)[0], tf.float32), self._init_state))
-
-"""
