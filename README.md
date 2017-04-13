@@ -39,14 +39,28 @@ Visuo-motor learning of simulated iCub robot [[1]](http://dl.acm.org/citation.cf
   * `model.py` : defining Tensorflow graph of the network model. you can define a new model you want to test.
   * `BasicConvLSTMCell.py` : implementation of convolutional LSTM(or RNN) [[4]](https://arxiv.org/abs/1506.04214) by [loliverhennigh](https://github.com/loliverhennigh/Convolutional-LSTM-in-Tensorflow). We added `BasicConvCTRNNCell` where LSTM cells are replaced by continuous time RNN (CTRNN) cells and `BasicConvCTNNCell` where LSTM cells are replaced by leaky integrator cells (as in MSTNN model [[5]](http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0131214))
   * `rnn_cell_ext.py`: implementation of normal CTRNN
-  
+  * `data` directory: contains dataset
+    * `dataset_np` directory: `npz` format file which contains dataset in list of `numpy` arrays
+    * `gestureVideos` directory: contains images to project in screen inside simulator
+    * `label`directory: sparsely transformed motor target
+    * `TRIAL_LIST`directory: list of visuo-motor sequence for training (in the sample experiment, only 4 digits number in the first colunm has meaning. The number of rows are same as the number of training sequences)
+      * 1st digit: object type (1: Ball, 2: Box, 3: Cylinder)
+      * 2nd digit: object size (1: Big, 2: Small)
+      * 3rd digit: object location (0-9 : different positions in front of the robot)
+      * 4th digit: object orientation (set 0 for all data)
+    * `vision` directory: visual input
+      
 * For online testing in the simulator 
   * `controller`: main program which controls iCub robot and synchronizes other sub-programs for the online testing. 
+  [YARP](http://www.yarp.it/) is used to communicate between each sub-programs.
   * `worldManipulator`: a program which set the task environment according to the direction from `controller` (making and removing objects and tables)
   * `fingerGrasper`: a program which controls the grasping level (a single scalar value from 0 to 10) as used in previous works [[2]](http://neurorobot.kaist.ac.kr/pdf_files/ICDL_2016_JS.pdf) and [[3]](https://arxiv.org/abs/1507.02347) 
   * `vision`: a program which captures visual scene from iCub camera for the network input and sends it to the `main.py` according to the direction from `controller`
   * `screenWriter`: a program which projects images to the screen inside the simulator
   * `main.py`: a Tensorflow program which loads trained the checkpoint file, calculate model outputs and send it to the `controller` at each time step
+  * `homePositions` directory: contains iCub's initial positions
+  * `softmaxConfig` directory: contains information for motor transform and inverse transform 
+  * `trialConf` directory: list of test trials
   
 # Training
 1) Run `bash run_programs.sh` (or `python train_rnn.py` with proper options)
