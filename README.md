@@ -33,10 +33,9 @@ Trained checkpoint file is too large to upload. You need to train using the `tra
   * Visual input: 48x64 size, greyscale value range from [-1,1]
   * Joint output: 10 DoF joints from iCub left arm and neck are used and each joint is sparsely transformed into 10 dimension. In conclusion, model's output dimension is 10x10 
   * Training datasets are collected using a dedicated program which is not shared in this repository. The structure of the dataset program is basically same as the online testing program in this repository but the motor generation part is replaced by hand coded program and saving vision(from iCub camera) and motor(from iCub joint) sequences parts are added. You can  either make the data collecting program or change the online testing program depending on your task senario.
-* We trained a CNN-RNN structure especially CNN-LSTM model for testing (the model can be changed to VMDNN [[2]](http://neurorobot.kaist.ac.kr/pdf_files/ICDL_2016_JS.pdf) using `BasicConvCTNNCell` in `BasicConvLSTMCell.py` and `BasicCTRNNCell` in `rnn_cell_ext.py`)   
-![VMDNN](./figures/vmdnn.jpg "VMDNN network figure")
-*Figure. VMDNN model without attention control. The model in the program is implemented based on the model in the figure. The figure is adopted from the final report of "Study on Application of Curriculum Learning in Deep
-Developmental Robotics" project funded by Venture Research Program for Graduate and PhD Students 2016 (VRPGP 2016)*
+* We trained a CNN-RNN structure especially CNN-LSTM model for testing (the model can be changed to VMDNN [[2]](http://neurorobot.kaist.ac.kr/pdf_files/ICDL_2016_JS.pdf) using `BasicConvCTNNCell` in `BasicConvLSTMCell.py` and `BasicCTRNNCell` in `rnn_cell_ext.py`)
+![VMDNN](./figures/vmdnn.jpg "VMDNN network figure")        
+*Figure. VMDNN model without attention control. The model in the program is implemented based on the model in the figure. The figure is adopted from the final report of "Study on Application of Curriculum Learning in Deep Developmental Robotics" project funded by Venture Research Program for Graduate and PhD Students 2016 (VRPGP 2016)*
 
 # Organization of the code
 * For training a model
